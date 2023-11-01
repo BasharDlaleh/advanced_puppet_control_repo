@@ -1,4 +1,4 @@
-node 'web.puppet.vm' {
+node 'master.puppet.vm' {
   include role::master
   #file {'/etc/secret_password.txt':
   #  ensure => file,
