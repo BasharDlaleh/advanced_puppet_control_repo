@@ -4,4 +4,8 @@ node 'master.puppet.vm' {
     ensure => file,
     content => lookup('secret_password'),
   }
+  file {'/etc/test.txt':
+    ensure => file,
+    content => 'test file',
+  }
 }
