@@ -1,4 +1,4 @@
-node default {
+node puppet.local {
   include role::master
  # file {'/etc/secret_password.txt':
  #   ensure => file,
