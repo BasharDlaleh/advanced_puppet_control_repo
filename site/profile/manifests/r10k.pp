@@ -4,9 +4,9 @@ class profile::r10k {
   class {'r10k':
     remote => 'https://github.com/BasharDlaleh/puppet_control_repo',
   }
-  class {'r10k::webhook::config':
-    use_mcollective => false,
-  }
+#  class {'r10k::webhook::config':
+#    use_mcollective => false,
+#  }
   #because this is an open source server, there's two parameters required here, user root and group root
   class {'r10k::webhook':
     user  => 'root',
