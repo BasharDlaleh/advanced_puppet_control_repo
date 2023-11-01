@@ -1,13 +1,2 @@
-# | This is eyaml edit mode. This text (lines starting with # | at the top of
-# | the file) will be removed when you save and exit.
-# |  - To edit encrypted values, change the content of the DEC(<num>)::PKCS7[]!
-# |    block.
-# |    WARNING: DO NOT change the number in the parentheses.
-# |  - To add a new encrypted value copy and paste a new block from the
-# |    appropriate example below. Note that:
-# |     * the text to encrypt goes in the square brackets
-# |     * ensure you include the exclamation mark when you copy and paste
-# |     * you must not include a number when adding a new block
-# |    e.g. DEC::PKCS7[]!
 ---
-secret_password: DEC::PKCS7[this is a secret password]!
+secret_password: ENC[PKCS7,MIIBiQYJKoZIhvcNAQcDoIIBejCCAXYCAQAxggEhMIIBHQIBADAFMAACAQEwDQYJKoZIhvcNAQEBBQAEggEAZo/E23fi1jzoTrpo3GJhF9hUd7uInhOZq/po5dPwaINDZhuRjEYUjRY+GWTtC6emBu1XM/tSZQNqecHKEnoNmvkygfYydXjFrRnaR3vC7mPpQdRFziMySdjrnTh8SYYidtjDSBuNCLaNxUYkepeyqPQZRHmOil46qGM+QAi+iZ24OYNMXSiYaFYmPs1g+NHqjsqtR3Be2ra/WpvlJdcMCd61kjsKhk8ba+rGWmDtmNt7+260byjscTEfzoQlSmL7vwNU/TXZK6TuPGIAxhs7sFIuntIb+me92mbDAnzKriZbJf8kW/G6Ie4q/H6HyHXNaNWjtBvfLdSnh6nkwEGnozBMBgkqhkiG9w0BBwEwHQYJYIZIAWUDBAEqBBD/p8mCpG3bf/TmBq7rVeP5gCA/hRawr/YgotKnkHHf6O088WITD2LS0r03UW2FtLeYAw==]
