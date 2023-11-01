@@ -2,7 +2,7 @@
 class profile::r10k {
   #below we are using some classes from the r10k module
   class {'r10k':
-    remote => 'https://github.com/BasharDlaleh/puppet_control_repo'
+    remote => 'https://github.com/BasharDlaleh/puppet_control_repo',
   }
   class {'r10k::webhook::config':
     use_mcollective => false,
