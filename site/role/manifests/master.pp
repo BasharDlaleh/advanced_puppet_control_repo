@@ -1,4 +1,4 @@
-# note that r10k webhook didn't work because we used the same master vm from the Beginner course whioch was already configured maually
+# note that r10k webhook didn't work because of a dependecy error
 class role::master {
   include profile::r10k
 }
