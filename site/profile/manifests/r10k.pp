@@ -6,8 +6,7 @@ class profile::r10k {
   }
   class {'r10k::webhook::config':
     use_mcollective => false,
-    # disabling ssl for simplicity
-    enable_ssl => false,
+    enable_ssl      => false,
   }
   #because this is an open source server, there's two parameters required here, user root and group root
   class {'r10k::webhook':
