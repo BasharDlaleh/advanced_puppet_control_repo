@@ -295,4 +295,43 @@ r10k and a control repo adds a powerful feature called code environments to Pupp
 
 ## Hiera (hierarchy)
 
+user {['bob', 'carol', 'bashar']:
+  ensure => present,
+}
 
+above creating three user accounts. imagine instead of three users, you have 30 or 300. What looks like reasonable code suddenly seems insane. Instead of including data like a list of users in the code, we can use a tool called Hiera to extract that away. This lets us focus on what our Puppet code does, and not get polluted by mixing data in with the code. the look up function needs to get the data from somewhere. Hiera is a tool that comes with Puppet. Its name come from the word hierarchy. Hiera works by allowing you to set up a hierarchical look up for your data. So that the more specific data can override the general.
+
+                                         DataCenters
+                                      Nodes
+                                        Environments
+                                     Default
+
+Imagine that this is the default settings that you'd like for most of your infrastructure. Default packages, add new users, that kind of thing. Then, above that, you had a layer for the environments. So in the Dav environment you might want to have debugging tools installed. And in Prod, you don't want the developers to have Sudu access. In the layer above, you might have some data that applies to specific nodes, or maybe different settings for different data centers. Imagine that look up function as looking from the top down on this stack. It will only see what's on the very top, so it will override the layers below. That's the hierarchy.
+
+#### Hiera Backends
+
+we have many options to use as Hiera backend for storing data: 
+
+1. store in plain yaml files (which is not secure)
+2. use a database 
+3. use eyaml which is encrypted-yaml where you can use yaml files and encrypt them instead of leaving them as plaintext
+
+
+
+#### Install EYAML
+
+we need to use gem to install eyaml, note that the gem version installed on your master node isn't the same as the one that puppet master has built-in inside the java jvm (because Puppet Server is a Ruby application that runs on the Java Virtual Machine JVM) so they maybe be different versions, to use eyaml we need to install hiera-eyaml gem on both the host and the puppetserver:
+
+#gem install hiera-eyaml                 ===> on host
+#puppetserver gem install hiera-eyaml    ===> on puppet server
+
+after that we need to create eyaml keys to use them for encryption:
+
+#cd /etc/puppetlabs/puppet
+#eyaml createkeys                         =====> will create keys in a directory named keys
+#mv keys/ eyaml-keys/                     =====> we can rename the folder to make it more clear
+#chown -R puppet:puppet /etc/puppetlabs/puppet/eyaml-keys/     =====> secure the folder
+#chmod -R 0500 /etc/puppetlabs/puppet/eyaml-keys/              =====> secure the folder
+#chmod -R 0400 /etc/puppetlabs/puppet/eyaml-keys/*.pem         =====> secure the keys
+
+now we need to add hiera.yaml config file to the repo to tell hiera what we want to do (define the hierarchy and the paths to the keys)
