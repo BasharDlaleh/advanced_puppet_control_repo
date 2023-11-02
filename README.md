@@ -5,11 +5,11 @@ exec resource type is used to run a command or a script on the agent nodes and i
 
 ## Namevar parameter
 in Puppet all resources have a Namevar parameter which for example is the path of the file in case of file resource, it's sometimes better and cleaner to write the path of the file/directory in the Namevar parameter instead of wriitng it with the file name in the title
-
+```
 file {'file_name'
   path => '/var/www'
 }
-
+```
 ## CLasses
 classes are not like programming languges classes, they are just a way to organize puppet code and make it reusable by defininf a group of resources in the class, you can use the classes you define in 2 ways:
 1. like other resources in case you wanted to override any variables the class exposes:
@@ -23,16 +23,16 @@ when we add profile::class1 before the class name it means we're adding this cla
 
 ### Classes Inhertiance
 it's possible to inherit classes in Puppet but it's not recommended except for a params class
-
+```
 class profile::class1(
   #here we add exposed variables, the type is optional
   String var1='value1'
 ) inherits profile::params{
   #here we add resources
 }
-
+```
 a params class is class we use to pass different values based on something like a fact sent from the agent node, below we're using the osfamily fact that's received from the agent node Facter to decide what to name the admin user we will create based on the OS and we're throwing an error in case the OS is not in the list
-
+```
 class profile::params {
   case $::osfamily {
     'Windows': {
@@ -46,7 +46,7 @@ class profile::params {
     }
   }
 }
-
+```
 ## Puppet Graph
 Puppet uses a Direct Acyclic Graph (DAG) to represent your code, DAG is how Puppet thinks about your infrastructure. When your code is compiled, Puppet builds a model of your infrastructure in the form of a DAG.
 You can use before/require/notify/subscribe to implement the relationships and dependecies between your resources
@@ -59,7 +59,7 @@ we can go to validate.puppet.com to validate our code and show a relationship/de
 
 ## Custom Resource Types
 Often, you'll create a custom defined resource type, when you have a class or a section of code that you wanna repeat multiple times. You could use an iterator for this, But defined types offer some abstraction and can make your code much more readable. an example of a class that we may want to turn into a defined type is a class that creates an admin user and adds their public access key so that they can log in securely. But because it's a class, we can only use it once. The only change you need to make in this example to convert it to a defined type is to change the word class to define.
-
+```
 define admin_user (
   $username = 'root',
   $email    = 'root@localhost',
@@ -83,7 +83,7 @@ admin_user{ 'bashar':
   username => 'bashar',
   pubkey   => 'AAATR6gvjUURYBJKEEKDJKJDLJDLEJIHLSLSSLSMJLKDLDHFJKSHJHDSJDSHDLSKDLSJDKL'
 }
-
+```
 ## Variables
 variables in Puppet are similar to oany prograaming language with the exception that they are immutable, meaning you can't change a variable after you assign a value to it. which makes sense because it's a cnofiguration managment tool that compiles your code and the agent facts to make a catalog so it doesn't make sense to hange a variable while creatin the catalog.
 
@@ -100,59 +100,59 @@ arrays can be used to iterate on a resource instead of writing the same resource
 
 ### IF
 if condition will be true if the condition result is not empty and false if the result is empty, any non-empty result will be true even if it's "false"
-
+```
 if $some_boolean {
   include class1
 }else {
   include class1
 }
-
+```
 ### UNLESS
 unless is the reverse of if
-
+```
 unless $some_number > 10 {
   include class1
 }else {
   include class1
 }
-
+```
 ### CASE
 case statement is shorter for multiple if statements
-
+```
 Case $employee_name {
   'bob': { include easy_tools }
   'carol', 'ahmed': { include expert_tools }
   'bashar': { include regular_tools }
 }
-
+```
 ### SELECTOR
 Selector statement is similar to Case but is only used for assiging values based on a condition (case can be used)
 below we're evaluating the os_family fact sent from the agent to choose what text editor to istall (of course the condition doesn't have to be a fact)
-
+```
 $default_editor $employee_name = $facts['os']['family'] ? {
   'Linux'   => 'vim'
   'Windows' => 'notepad'
   default   => 'nano'       ==> default value
 }
-
+```
 ## Iteration
 
 we can use 'each' to loop on an array or a hash (a hash is like a dictionary in python):
-
+```
 ['ali', 'bob', 'carol'].each |$username| {
   user {$username:
     ensure => present,
   }
 }
-
+```
 in the above example we don't need an iterator we can just use an array whic is simpler:
-  
+```
 user {['ali', 'bob', 'carol']:
   ensure => present,
 }
-
+```
 however, each iterator is useful when we wannt iterate over a variable instead of static value:
-
+```
 ['ali', 'bob', 'carol'].each |$username| {
   user {$username:
     home => "/var/www/$username",
@@ -169,9 +169,9 @@ however, each iterator is useful when we wannt iterate over a variable instead o
     managehome => true
   }
 }
-
+```
 we can achieve the above without iterators and just by using a defined custom resource (it's up to you to choose the better way for your case but since a custom resource defines an additonal layer of abstraction it's better to use it for more complex cases where you need to define more than 3 resources):
-
+```
 define webuser (
   $username
 ){
@@ -183,7 +183,7 @@ define webuser (
 webuser {['ali', 'bob', 'carol']:
   ensure => present,
 }
-
+```
 note that there are other functions to iterate like .map and .filter which are similar to Javascript use cases
 
 ## Facts
@@ -201,6 +201,7 @@ $facts['os']['release']['major']
 
 a common use of facts is to decide what values to use based on operating system type which is used a lot in params class:
 
+```
 case $facts['os']['name'] {
   'Solaris': { include role::solaris}
   'RedHat', 'CentOS': { include role::redhat}
@@ -218,24 +219,24 @@ Puppet has many built-in functions to make your life easy like
 - epp() which is used with templates where we pass the template name and the values we wanna add in that template and it returns a string that contains the entire interpreted template with the values you want.
 
 - lookup() is used to retrieve data from 'Heira' which is a hierarical key-value data store that comes with Puppet, below we're retrieving the users list from Heira by passing the admin_users key:
-
+```
 $userlist = lookup('profile::$admin_users::users')
 
 user {$userlist:
   ensure => present,
 }
-
+```
 Heira and the lookup function here do the complicated work of figuring out which list of users should be returned for that particular node, which helps keep your puppet code simple and readable.
 
 ## File Sources
 
 we can use the puppet file serving system to serve files from some directory on the puppet master:
-
+```
 file {'/etc/motd':
   ensure  => file,
   source => 'puppet:///modules/modulename/directory/motd.txt',
 }
-
+```
 we can use an external server to serve files instead of the master server by specifying the server (ip or dns) and the mount_path(modulename) and finally the path to the file (note that this solution has been deprecated and now there are other better options to host files):
 
 puppet://<SERVER>/<MOUNT PATH>/<PATH>
@@ -244,7 +245,7 @@ puppet://<SERVER>/<MOUNT PATH>/<PATH>
 
 Resource defaults are used if you're defining multiple resources in a class, and you want them all to have the same setting for one of the perameters, you don't need to type it multiple times. Instead, you can use a capital letter for the start of the resource type name and it will apply to all resources within the local scope. For now, just think of a scope as resources defined within the same class.
 the below owner, group, mode parameters will be applied to all file resources:
-
+```
 File {
   owner => 'root',
   group => 'root',
@@ -260,9 +261,9 @@ file {'/etc/motd':
   ensure  => file,
   source => 'puppet:///modules/defaults/motd.txt',
 }
-
+```
 Here's another way of specifying defaults for several files. It's less common than the one above, but in many ways, it's the better method because it doesn't run into any tricky issues with scope (the defaults will only apply to the resources defined under it). In this method, the resource defaults are limited to these resources. There are two new things in this style. First, there's the default section at the top. The other difference is that each section is separated by a semicolon
-
+```
 file {
   default:
     owner => 'root',
@@ -277,7 +278,7 @@ file {
   ensure  => file,
   source => 'puppet:///modules/defaults/motd.txt',
 }
-
+```
 ## r10k 
 
 r10k is used to deploy pupper repo changes, we can add r10k in 2 way:
@@ -294,11 +295,11 @@ and then we can start running #r10k deploy environment -p
 r10k and a control repo adds a powerful feature called code environments to Puppet. This lets you segment your infrastructure by environment and have separate branches in your control repo code so that each environment has its own configuration (r10k instantiates an environment per branch in /etc/puppetlabs/code/environments). When a node checks in with the master, it will determine the appropriate environment for that node and then compile the catalog for that node using the code for that specific environment. Code environments can map to your actual infrastructure environments like Dev-QA-Prod or QA-Staging-Prod.
 
 ## Hiera (hierarchy)
-
+```
 user {['bob', 'carol', 'bashar']:
   ensure => present,
 }
-
+```
 above creating three user accounts. imagine instead of three users, you have 30 or 300. What looks like reasonable code suddenly seems insane. Instead of including data like a list of users in the code, we can use a tool called Hiera to extract that away. This lets us focus on what our Puppet code does, and not get polluted by mixing data in with the code. the look up function needs to get the data from somewhere. Hiera is a tool that comes with Puppet. Its name come from the word hierarchy. Hiera works by allowing you to set up a hierarchical look up for your data. So that the more specific data can override the general.
 
                                          DataCenters
@@ -342,7 +343,7 @@ note that:
 4. when an agent asks for configuration the master decrypts the encrypted files and compile it in the catalog and send it to the agents.
 
 ####################################################################################################################################
-note that we used the command #puppet agent -t --environment=advanced to deploy the 'advanced' environment configuration instead of the default 'production' environment
+note that we used the command #puppet agent -t --environment=advanced to deploy the 'advanced' environment configuration instead of the default 'production' environment instead of creating a new VM for the advanced course
 ####################################################################################################################################
 
 ## Testing
@@ -360,3 +361,35 @@ puppet testing is done in three layers from top to bottom:
 
 here we actually write a vagrant file that provisions a vm and runs a script that applies puppet condig and then use a tool like RSPEC-PUPPET to make sure the config are applied.
 
+#### RSPEC_PUPPET
+
+RSPEC-PUPPET is the tool for testing your puppet code. It's based on rspec, which is a ruby testing tool. Rspec and Rspec-puppet have their own domain specific language DSL for creating tests. It's fairly straightforward and you'll find that a lot of the tests follow a very similar pattern
+
+install rspec-puppet and some helpers:
+
+#gem install rspec-puppet puppetlabs_spec_helper rspec-puppet-facts
+
+the puppet development kit PDK is a tool that we can use for developing modules, but it also has a handy feature of generating tests as you are working on your module, we can either install the GUI app on our laptop just like VSCode or install the CLI tool on a dev server which will give us some commands to make building modules and tests easy
+
+#cd site/
+#pdk new module rspec_example ===> will generate a base module files and directories including an spec folder which includes the tests
+#cd rspec_example             
+#pdk new class rspec_example  ===> will generate an init class for the module in module_name/manifests/init.pp 
+#rspec                        ===> will run the generated tests in spec folder
+
+Running rspec directly isn't really recommended. It's actually better to use the rake command. Rake is a Ruby build tool that allows you to configure various tasks associated with your code, like packaging the module to be uploaded to the Puppet Forge, or running these rspec tests. It uses a rake file for configuration, and, in the case of the generated code, it has a number of built-in tasks.
+
+#rake spec     ===> same as rspec
+#rake lini     ===> same as puppet-lint
+
+The default test that's generated by the PDK is to check if the module compiles without errors, and the PDK has the handy feature of generating tests for every operating system that your module supports. So you can see that our class will compile on all these Debian family operating systems(because we chose Debian only). the test file is spec/classes/rspect_example_spec.rb. 
+
+This first line means that it's importing code from another helper file.
+
+the code describes the class name and loops through a list of supported operating systems. 
+
+The context block here lets you create multiple subsections in your test. In this case, it's one for each of the operating systems.
+
+The let facts line allows us to set facts that Puppet would use when compiling the catalog. This is important, because rspec doesn't gather facts using facter, if your code depends on certain facts, you'll need to specify them so the master gets them for you. 
+
+this is the heart of the test. For every operating system, the class should compile. it gets the list of operating systems from the helper scripts, which parse the metadata.json file in the root of the module. 
