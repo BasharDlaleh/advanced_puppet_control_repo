@@ -287,7 +287,7 @@ r10k is used to deploy pupper repo changes, we can add r10k in 2 way:
     #vim /etc/puppetlabs/r10k/r10k.yaml
 2. use puppet to install r10k as a module and confgure it automatically with one command
     #puppet module install puppet/r10k --modulepath=/etc/puppetlabs/code/modules/
-    #puppet apply -e 'class {"r10k": remote => "https://github.com/BasharDlaleh/puppet_control_repo.git"}' --modulepath=/etc/puppetlabs/code/modules/
+    #puppet apply -e 'class {"r10k": remote => "https://github.com/BasharDlaleh/advanced_puppet_control_repo.git"}' --modulepath=/etc/puppetlabs/code/modules/
 
 and then we can start running #r10k deploy environment -p
 
@@ -334,4 +334,29 @@ after that we need to create eyaml keys to use them for encryption:
 #chmod -R 0500 /etc/puppetlabs/puppet/eyaml-keys/              =====> secure the folder
 #chmod -R 0400 /etc/puppetlabs/puppet/eyaml-keys/*.pem         =====> secure the keys
 
-now we need to add hiera.yaml config file to the repo to tell hiera what we want to do (define the hierarchy and the paths to the keys)
+now we need to add hiera.yaml config file to the repo to tell hiera what we want to do (define the hierarchy and the paths to the keys).
+note that:
+1. we created an encrypted data file with the comamnd  #eyaml edit common.yaml on the master server whic has the eyaml keys.
+2. we added the genrated file commom.yaml in the repo under data directory.
+3. puled the code on master with r10k, the master knows how to decrypt it because it has the keys in which it were encrypted.
+4. when an agent asks for configuration the master decrypts the encrypted files and compile it in the catalog and send it to the agents.
+
+####################################################################################################################################
+note that we used the command #puppet agent -t --environment=advanced to deploy the 'advanced' environment configuration instead of the default 'production' environment
+####################################################################################################################################
+
+## Testing
+
+puppet testing is done in three layers from top to bottom:
+
+1. syntax checking and linting: There's a handy tool called puppet-lint that you can download as a gem. It will catch outright syntax errors and typos, but it also gives a lot of suggestions for improving the style of your Puppet code to make it more readable. 
+
+#puppet parser validate example.pp
+#puppet-lint example.pp
+
+2. unit and integration tests: Usually unit tests refer to small tests that work on a single unit of code, for example, an object class or even a single function. Integration tests tend to be more about putting the pieces together. With Puppet, we use a same tool for both tasks whihc is puppet-rspec. Puppet-rspec is also available as a gem.
+
+3. automated acceptance tests and manual tests: Acceptance tests actually try out the code on some kind of simulated environment. There's a tool called beaker that's used to test Puppet itself, that can be used for this purpose. But it's also possible to use Vagrant as a test environment, or even use Packer. Beaker is nice because it lets you do multi-node testing. the manual tests is where you just manually set up a VM and apply your Puppet code. There's a reason these are at the bottom. They're the most resource, time, and labor intensive of the tests. So you wanna catch the simple bugs before you get to this layer.
+
+here we actually write a vagrant file that provisions a vm and runs a script that applies puppet condig and then use a tool like RSPEC-PUPPET to make sure the config are applied.
+
