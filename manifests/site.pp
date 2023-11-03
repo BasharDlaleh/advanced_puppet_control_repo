@@ -7,6 +7,6 @@ node 'master.puppet.vm' {
   }
 }
 
-node 'elk.puppet.vm' {
+node 'web.puppet.vm' {
   include role::elk
 }
