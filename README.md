@@ -359,7 +359,7 @@ puppet testing is done in three layers from top to bottom:
 
 3. automated acceptance tests and manual tests: Acceptance tests actually try out the code on some kind of simulated environment. There's a tool called beaker that's used to test Puppet itself, that can be used for this purpose. But it's also possible to use Vagrant as a test environment, or even use Packer. Beaker is nice because it lets you do multi-node testing. the manual tests is where you just manually set up a VM and apply your Puppet code. There's a reason these are at the bottom. They're the most resource, time, and labor intensive of the tests. So you wanna catch the simple bugs before you get to this layer.
 
-here we actually write a vagrant file that provisions a vm and runs a script that applies puppet condig and then use a tool like RSPEC-PUPPET to make sure the config are applied.
+here we actually write a vagrant file that provisions a vm and runs a script that applies puppet config and then use a tool like RSPEC-PUPPET to make sure the config are applied.
 
 #### RSPEC_PUPPET
 
@@ -407,7 +407,51 @@ end
 ```
 RSPEC is a big thing so you need to take a course on it.
 
-##
+we can integrate any module we build with Travis-ci to have automated runs for the tests we have by creating a git repo and pushing the module code to it.
+
+#### Beaker
+
+we sat up beaker but didn't really make it work because it needs to be run on our host machine and provision vagrant vms which requires installing a lot of things on the host (ruby, gems, .....etc)
+
+## Modules 
+
+A Puppet module is really just a structured set of directories and text files organized and named in a way that Puppet expects. the main files and directories that you'll find in a module:
+
+1. The manifests directory: is where Puppet code goes, and it needs to follow a specific structure. For example, here's the code for an Apache class in the main Puppetlabs Apache module. For the main class in the module, that is, the one that shares a name with the module, the code goes in manifests/init.pp. For the rest of the code in the module, the pattern is simpler. For the Apache proxy class, for example, the code belongs in manifests/proxy.pp, and for classes or defined types that are similar to the pattern apache::mod::python, the code would go into a subdirectory at the manifests directory, manifests/mod/python.pp. It's also worth noting here that the apache::mod defined type goes in manifests/mod.pp, even though we already have a directory named manifests/mod. 
+
+2. The files directory: is where you put any files that are always the same, that is, files that don't need to adapt to the specifics of the node where the code is applied. 
+
+3. The templates directory: holds all your dynamic templates, text files that include variables from your Puppet code. When writing a module, we start with a lot of static files and then end up converting them to templates as the code gets more complex.
+
+4. The spec directory: holds things like unit and acceptance test code and supporting files. Some tests will look for a subdirectory called spec/fixtures, which holds the supporting code for your tests, such as dependency modules. Those modules are specified in a .fixtures.yml file in the root directory of your module. below is an example of a fixtures.yml file from a Graphana module. The makers of Puppet provide a gem called puppetlabs_spec_helper that includes rate tasks and helper scripts for testing your code. One of the features of that gem is downloading fixtures based on this format. You can include remote modules from the forge or source control repositories and local modules using that sim like section. 
+
+5. metadata.json file: This is the file that Puppet and the Puppet Forge use to get the general metadata about the module, such as module dependencies. It's not strictly required, but you'll need it if you're going to push modules to the forge. 
+
+6. the tasks directory: some modules have a tasks directory to support the Puppet tasks feature, which is a way of running ad hoc tests against Puppet nodes rather than managing the desired state. if you're currently using or considering something like Ansible alongside Puppet, you might look into tasks, because they fill a similar function.
+
+in puppet forge website there are a lot of types of modules (supprted, approved, partner, tasks), tasks allow you to perform ad-hoc actions using a tool called Puppet Bolt or the Puppet Enterprise Orchestrator features. For example, the Postgres module has a task that let's you run database queries. Tasks have a lot of potential but it's actually simpler to just use something like SSH.
+
+metda.json
+manifests/
+          init.pp
+          proxy.pp
+          mod.pp
+          mod/
+             python.pp
+files/
+      static_file.txt
+template/
+        dynamic_file.epp
+spec/
+     spec_helper.rb
+     classes/
+            test.pp
+
+
+
+
+
+
 
 
 
