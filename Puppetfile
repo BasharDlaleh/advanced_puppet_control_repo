@@ -10,3 +10,4 @@ mod 'puppet-logstash', '7.0.0'
 # note that we can import modules from puppet forge or from a git repo like we did below
 mod 'elk',
   :git => 'https://github.com/BasharDlaleh/puppet_ELK_module.git'
+  :ref => 'main'
