@@ -1,7 +1,8 @@
+# be very aware to use the appropriate versions according to each modules's docs
 mod 'puppet-kibana', '8.0.0'
-mod 'puppet-elastic_stack', '8.0.2'
+mod 'puppet-elastic_stack', '9.0.0'
 mod 'puppetlabs-stdlib', '8.6.0'
-mod 'puppetlabs-apt', '9.1.0'
+mod 'puppetlabs-apt', '9.0.2'
 mod 'puppet-elasticsearch', '8.1.0'
 mod 'puppetlabs-java', '8.2.0'
 mod 'puppet-archive', '6.1.2'
