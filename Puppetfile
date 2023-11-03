@@ -8,5 +8,5 @@ mod 'puppet-archive', '7.1.0'
 mod 'puppetlabs-java_ks', '5.0.0'
 mod 'puppet-logstash', '7.0.0'
 # note that we can import modules from puppet forge or from a git repo like we did below
-mod 'bashardlaleh-elk',
+mod 'elk',
   :git => 'https://github.com/BasharDlaleh/puppet_ELK_module.git'
