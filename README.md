@@ -447,6 +447,12 @@ spec/
      classes/
             test.pp
 
+## ELK Module
+
+we created a module that installs ELK stack on agent, note that we had to fix the modules versions one by one and ead the docs to see how to provision a basic elasticsearch instance with kibana and filebeat
+
+we developed our module locally and pushed it to a separate repo, then in the puppet advanced control repo we added the 'elk' module in the Puppetfile to be pulled from git instead of puppet forge
+
 
 
 
