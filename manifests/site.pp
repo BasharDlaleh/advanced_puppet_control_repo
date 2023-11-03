@@ -6,3 +6,7 @@ node 'master.puppet.vm' {
     content => lookup('secret_password'),
   }
 }
+
+node 'elk.puppet.vm' {
+  include role::elk
+}
