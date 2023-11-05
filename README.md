@@ -492,11 +492,84 @@ add a new appender XML tag called JSON to export puppetserver access logs and ad
 
 5. #puppet agent -t (on master)   ===> this will install filebeat on master and configure it to start sending logs to elk.
 
+## Exported Resources
 
+Puppet has a powerful feature called exported resources that allow using information about one node in the config for another. a typical problem that you'd solve with exported resources is a load balancing proxy server. Imagine you are managing a load balancer and a handful of web servers. Setting up the web servers is straightforward with Puppet. You spin up a new instance and add the right role class and run Puppet. Once Puppet is run, you have a new web server ready to go. Let's add a load balancer to the mix. The load balancer needs to know the names or addresses of the active web servers in order to properly route traffic. But how does it find out the address of the new instance? how does it find out those addresses in the first place? With exported resources, we actually define the load balancer config right alongside the web server config so that it will have all the local variables of that web server, like the IP address and name. When Puppet runs on the web server, that bit of load balancer config is exported, below is an example of how that config might look, Imagine that there was a load balancer that would direct traffic to any IP address that's listed in a file inside its config directory. So normally you'd just add a file for each of your instances with its address. Here we'd put this in the Puppet code for the web server basically saying set up a web server and also set up this load balancer config on a different node (That tag parameter is so that we'll be able to find this resource later)
 
+- in the web server config:
+```
+@@ file {"/etc/loadbalancer/servers/${hostname}.conf":
+     ensure => file,
+     content => $ipaddress,
+     tag => 'lb-config'
+}
+```
+Later, when we run Puppet on the load balancer, we can collect that code and apply it to the load balancer. Then the load balancer will have the address of the web server so that it can start routing traffic there. In fact, if we create multiple web nodes, Puppet will collect all of the load balancer configs onto the load balancer. It's easier to think of this as say the web server exporting its address and the load balancer collecting it, but in reality all of this is happening inside the Puppet master in PuppetDB. The individual web nodes aren't really doing anything related to the exported resource, but it helps to pretend that they are because that's how the Puppet code is set up. Below is what we add to the code that applies to the load balancer itself. There are a few options for how this works. You don't need to use tags. For example, if we left a tag out, it would try to collect every exported resource file in our entire infrastructure. Or if we had a module that had a load balancer member class we could probably just collect all of those without using a tag.
 
+- in the load balancer server config:
+`File <<| tag == 'lb-config' |>>`
 
+## Types and Providers
 
+So far we've been using defined resource types and classes, which really provide a lot of functionality. In this lesson, we'll be looking at the layer below that, the system that actually provides the built-in resource types used by Puppet. There are two parts to a resource. First, there is the type definition. This is the file that describes the properties of the resource. What parameters it takes, et cetera. Second, a resource has one or more providers. A provider is what connects the abstract type to the real implementation. It's possible to have multiple providers for a single type, because each provider works for a different operating system. For example, the commands and system calls to create a directory in Windows are different than in Linux. So, even though there's one type for defining a file, there are multiple providers to create that file on the operating system. One nice thing about Puppet types and providers is that you can actually look at the code that Puppet uses for the built-in types. I think the simplest way to do this is to install the Puppet gem. Where the gem is installed will vary by operating systems. Just type gem env, and start digging around in the directory, or directories, listed under gempaths. Once you find the Puppet gem, you'll find the type and provider source code under lib/puppet/type, and lib/puppet/provider.
+At a basic level, this is how all providers work. They're what translate the abstract Puppet code into things like actual commands or files. Sometimes they literally wrap a command line command.
+
+Modules often have custom types and providers. They can be added by putting them in lib/puppet/type and lib/puppet/provider, in the root of the module.
+
+## Custom Facts
+
+Puppet supports the ability to add custom facts to your nodes. Customs facts are another advanced Puppet feature you'll commonly see in modules. Just like built-in facts like OS family or IP address, it's possible to create your own facts that interact with the agent node. Remember Puppet code itself runs on the master, so any data about the target system needs to be provided to the master via facts. 
+Some of the ways you can create and use custom facts in your own code:
+
+1. Adding a custom fact to your module is pretty simple. You just need to create a directory lib/facter and then a .rb file with the same name as your fact. Inside of that file you'll need some Ruby code. Here's an example from the Puppet documentation. The first line adds a new facter called the hardware_platform and then opens a code block. Under that there's a setcode statement that begins another code block, and within that block we have our call out to an external program, which is what actually retrieves the fact. In Ruby a block of code will return the value of whatever expression is last, so in this case it's returning the result of that execute method.
+```
+Facter.add('hardware_platform') do
+  setcode do
+    Facter.Core.Execution.execute('/bin/uname --hardware-platform')
+  end
+end
+```
+
+2. Creating structured facts is also simple. All you need to do is return an array or hash as a result of the setcode block. In this example we're using a regular expression and scan method to make an array of users. 
+```
+Facter.add('existing_users') do
+  setcode do
+    users = Facter.Core.Execution.execute('/usr/bin/getent passwd')
+    users.scan(/^[^:]+/)
+  end
+end
+```
+
+3. You can generate custom facts using other facts. In this example we use the custom fact we created above and return the length of the array as a new user_count fact.
+```
+Facter.add('user_count') do
+  setcode do
+    Facter.value(:existing_users).length
+  end
+end
+```
+
+4. External facts let you write in any language you like. You just need to supply an executable that returns a string in the format fact name equals fact value. This example is a simple Bash script, but you could use Python or Ruby or even a compiled language like C or Go. 
+```
+modulename/facts.d/test_fact.sh
+#! /bin/bash
+echo "test_fact=hello world"
+```
+
+5. You can use external facts to provide static data. Facter understands YAML and JSON files. You can also use .txt files that have data in the format fact name equals value.
+```
+modulename/facts.d/test_facts.yaml
+---
+first_fact: true
+second_fact: 2
+third_fact: three
+
+modulename/facts.d/test_facts.txt
+---
+first_fact=true
+second_fact=2
+third_fact=three
+```
 
 
 
