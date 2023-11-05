@@ -12,3 +12,9 @@ mod 'puppet-logstash', '7.0.0'
 mod 'elk',
   :git => 'https://github.com/BasharDlaleh/puppet_ELK_module.git',
   :ref => 'main'
+mod 'puppetlabs-puppetdb', '7.13.0'
+mod 'puppetlabs-inifile', '5.4.1'
+mod 'puppetlabs-postgresql', '8.3.0'
+mod 'puppet-systemd', '4.2.0'
+mod 'puppetlabs-concat', '7.4.0'
+mod 'puppetlabs-firewall', '3.6.0'

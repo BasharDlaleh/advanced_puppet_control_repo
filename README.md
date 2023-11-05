@@ -453,6 +453,26 @@ we created a module that installs ELK stack on agent, note that we had to fix th
 
 we developed our module locally and pushed it to a separate repo, then in the puppet advanced control repo we added the 'elk' module in the Puppetfile to be pulled from git instead of puppet forge
 
+## Reporting
+
+Puppet store reports about its execution as yaml files in a directory we specify (by default it's /opt/puppetlabs/puppet/cache/state/), the reports of each node will be on the node itself, to show a list of Puppet config:
+
+#puppet config print                      ===> show all config
+#puppet config print [config_name]        ===> show one specific config
+
+yaml file reports are not super human-readable, but it's not terrible. You can see what resources changed. You can see some notice resources that happened in this last Puppet run. You can see the total number of what changed. you can see that a resource was out of sync in that Puppet run. You can see whether it was a corrective change or whether it was an intentional change. For each of resources, we can see all the details of what happened. We also see the evaluation time which is a very useful piece of information, because it tells you how long this actually took. So you can look for these in your Puppet code and figure out where the slow points are. It's a great way to improve the speed of your Puppet runs.
+
+The other built-in reporting process apart from the regular log files is the HTTP report processor, which enables you to configure an HTTP server to post these YAML report files to. All the external reporting systems rely on having Puppet DB configured, which is simple to set up. There's a Puppet module for setting up Puppet DB, we add the modules and its dependencies in the Puppetfile,
+
+after that we can create a profile and role for that and add it to the master node (we assume that we want to add the db on the master node itself which is not recommended for production, in production you better add an external db server), also we need to add the db config in puppet.conf file:
+
+1. add puppetdb module and its dependencies in Puppetfile
+2. add profile and role to master
+3. #puppet agent -t (on master)
+4. #vim /etc/puppetlabs/puppet/puppet.conf   
+   [main]
+   reports = store, puppetdb,http
+5. #systemctl restart puppetserver
 
 
 
