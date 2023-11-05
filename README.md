@@ -455,7 +455,7 @@ we developed our module locally and pushed it to a separate repo, then in the pu
 
 ## Reporting
 
-Puppet store reports about its execution as yaml files in a directory we specify (by default it's /opt/puppetlabs/puppet/cache/state/), the reports of each node will be on the node itself, to show a list of Puppet config:
+Puppet store reports about its execution in yaml files in a directory we can specify (by default it's /opt/puppetlabs/puppet/cache/state/), the reports of each node will be on the node itself, to show a list of Puppet config:
 
 #puppet config print                      ===> show all config
 #puppet config print [config_name]        ===> show one specific config
@@ -468,11 +468,33 @@ after that we can create a profile and role for that and add it to the master no
 
 1. add puppetdb module and its dependencies in Puppetfile
 2. add profile and role to master
-3. #puppet agent -t (on master)
-4. #vim /etc/puppetlabs/puppet/puppet.conf   
+3. #puppet agent -t (on master)   ===> this will install puppetdb on master
+4. #vim /etc/puppetlabs/puppet/puppet.conf   ===> this will will start using puppetdb for reporting
    [main]
-   reports = store, puppetdb,http
+   reports = store, puppetdb, http
 5. #systemctl restart puppetserver
+
+#### Configuring Puppetserver to send logs to ELK stack
+
+we will configure puppet master to generate JSON logs and send them to the ELK stack we provisioned on the agent, we'll install filebeat on puppet master and have ship the logs to logstash on the agent,
+
+1. vim /etc/puppetlabs/puppetserver/logback.xml
+
+add a new appender XML tag called JSON to export puppetserver logs and add it to the appevder-ref section at the bottom
+
+2. vim /etc/puppetlabs/puppetserver/request-logging.xml
+
+add a new appender XML tag called JSON to export puppetserver access logs and add it to the appevder-ref section at the bottom
+
+3.  run 'systemctl restart puppetserver.service' so the puppet master will start generating JSON logs
+
+4. first we add prospectors in filebeat config template 'filebeat.yaml.epp' that's used by the filebeat class in the elk module we created so we can configure what logs to ship to elk using prospectors, then we will create a profile filebeat_puppeterver and use the filebeat class in it (will pass the logs we want) and add it to the master role so filebeat service gets installed on the master. 
+
+5. #puppet agent -t (on master)   ===> this will install filebeat on master and configure it to start sending logs to elk.
+
+
+
+
 
 
 
