@@ -354,6 +354,7 @@ puppet testing is done in three layers from top to bottom:
 
 #puppet parser validate example.pp
 #puppet-lint example.pp
+#puppet catalog compile web.puppet.vm > /tmp/web.json  ==> compile the catalog for some node and export the catalog to a file
 
 2. unit and integration tests: Usually unit tests refer to small tests that work on a single unit of code, for example, an object class or even a single function. Integration tests tend to be more about putting the pieces together. With Puppet, we use a same tool for both tasks whihc is puppet-rspec. Puppet-rspec is also available as a gem.
 
