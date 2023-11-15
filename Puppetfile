@@ -21,6 +21,4 @@ mod 'puppetlabs-firewall', '3.6.0'
 mod 'microk8s',
   :git => 'https://github.com/BasharDlaleh/puppet_micork8s_module.git',
   :ref => 'main'
-mod 'simp-iptables', '6.13.0'
-mod 'simp-simplib', '4.12.1'
-mod 'simp-simpkv', '0.12.0'
+mod 'puppetlabs-firewall', '5.0.0'
