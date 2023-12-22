@@ -18,6 +18,7 @@ mod 'puppetlabs-postgresql', '8.3.0'
 mod 'puppet-systemd', '4.2.0'
 mod 'puppetlabs-concat', '7.4.0'
 mod 'puppetlabs-firewall', '3.6.0'
+mod 'domkrm-ufw', '1.1.4'
 mod 'microk8s',
   :git => 'https://github.com/BasharDlaleh/puppet_micork8s_module.git',
   :ref => 'main'
