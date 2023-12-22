@@ -11,6 +11,6 @@ node 'db.puppet.vm' {
   include role::elk
 }
 
-node 'microk8s.puppet.vm' {
+node 'web.puppet.vm' {
   include role::microk8s
 }
